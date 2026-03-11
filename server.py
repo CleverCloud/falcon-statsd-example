@@ -1,19 +1,18 @@
 import falcon
 import statsd
 
-class QuoteResource:
+stats_client = statsd.StatsClient("localhost", 8125)
+
+
+class HelloResource:
     def on_get(self, req, resp):
         """Handles GET requests"""
-        quote = {
-            'quote': (
-                "I've always been more interested in "
-                "the future than in the past."
-            ),
-            'author': 'Grace Hopper'
+        stats_client.incr("hello_requests")
+        resp.media = {
+            "quote": "I've always been more interested in the future than in the past.",
+            "author": "Grace Hopper",
         }
-        c = statsd.StatsClient('localhost', 8125)
-        c.incr('helloItsMe')
-        resp.media = quote
 
-api = falcon.API()
-api.add_route('/hello', QuoteResource())
+
+app = falcon.App()
+app.add_route("/", HelloResource())
